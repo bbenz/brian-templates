@@ -42,8 +42,6 @@ FRONTEND_IMAGE='tailwind-frontend:0.1'
 # printf "\n*** Creating resource group $RESOURCE_GROUP_NAME ***\n"
 # az group create -n $RESOURCE_GROUP_NAME -l $LOCATION
 
-sleep 20m
-
 printf "\n*** Creating the SQL Server 2012 Virtual Machine (can take 20 minutes) ***\n"
 az group deployment create -g $RESOURCE_GROUP_NAME --template-file sqlvmdeploy.json \
     --parameters adminUsername=$USERNAME adminPassword=$PASSWORD sqlAuthenticationPassword=$PASSWORD sqlAuthenticationLogin=$USERNAME virtualMachineName=$SQL2012_VM_NAME

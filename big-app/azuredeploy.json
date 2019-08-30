@@ -9,7 +9,7 @@
 			  }
 		},
 		"USERNAME": {
-			"type": "securestring",
+			"type": "string",
 			"metadata": {
 				"description": "Username (applied to all resources)."
 			  }
