@@ -15,13 +15,13 @@
 			  }
 		},
 		"PASSWORD": {
-			"type": "string",
+			"type": "securestring",
 			"metadata": {
 				"description": "Password (applied to all resources, except Azure SQL - no exclamation points)."
 			  }
         },
 		"AZURESQLPASS": {
-			"type": "string",
+			"type": "securestring",
 			"metadata": {
 				"description": "Password for Azure SQL - must be strong."
 			  }
