@@ -107,14 +107,6 @@
 								"secureValue": "[concat(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName')))]"
 							},
 							{
-								"name": "CLIENT_ID",
-								"secureValue": "[parameters('servicePrincipalId')]"
-							},
-							{
-								"name": "SECRET",
-								"secureValue": "[parameters('servicePrincipalSecret')]"
-							},
-							{
 								"name": "USERNAME",
 								"secureValue": "[parameters('USERNAME')]"
                             },
@@ -125,6 +117,10 @@
                             {
 								"name": "AZURESQLPASS",
 								"secureValue": "[parameters('PASSWORD')]"
+							},
+							{
+								"name": "LOCATION",
+								"secureValue": "[resourceGroup().location]"
 							}
 						]
 					}

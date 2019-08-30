@@ -12,6 +12,7 @@ RESOURCE_PREFIX=$RESOURCE_PREFIX
 USERNAME=$USERNAME
 PASSWORD=$PASSWORD
 AZURESQLPASS=$AZURESQLPASS
+LOCATION=$LOCATION
 
 echo "Welcome to Tailwind Traders Data Migration!!"
 
@@ -33,13 +34,15 @@ PRODUCT_SERVICE_IMAGE='tailwind-product-service:0.1'
 INVENTORY_SERVICE_IMAGE='tailwind-inventory-service:0.1'
 FRONTEND_IMAGE='tailwind-frontend:0.1'
 
-MAIN_REGION=eastus
+# MAIN_REGION=eastus
 
 # printf "\n*** Setting the subsription to $SUBSCRIPTION***\n"
 # az account set --subscription "$SUBSCRIPTION"
 
-printf "\n*** Creating resource group $RESOURCE_GROUP_NAME ***\n"
-az group create -n $RESOURCE_GROUP_NAME -l $MAIN_REGION
+# printf "\n*** Creating resource group $RESOURCE_GROUP_NAME ***\n"
+# az group create -n $RESOURCE_GROUP_NAME -l $MAIN_REGION
+
+sleep 20m
 
 printf "\n*** Creating the SQL Server 2012 Virtual Machine (can take 20 minutes) ***\n"
 az group deployment create -g $RESOURCE_GROUP_NAME --template-file sqlvmdeploy.json \
