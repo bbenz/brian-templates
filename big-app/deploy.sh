@@ -82,7 +82,7 @@ printf "\n*** Deploying the App Services and Cosmos DB ***\n"
 az group deployment create -g $RESOURCE_GROUP_NAME --template-file appservicedeploy.json --parameters prefix=$RESOURCE_PREFIX location=$LOCATION sqlVMIPAddress=$SQL2012_VM_IP_ADDRESS sqlAdminLogin=$USERNAME sqlAdminPassword=$PASSWORD
 
 # *** DELETE EVERYTHING TO THE NEXT 3 asterisks
-cd ignite-tour-lp1s1/deployment
+#cd ignite-tour-lp1s1/deployment
 # *** DONE DELETING
 
 # *** UNDELETE THE NEXT LINE
