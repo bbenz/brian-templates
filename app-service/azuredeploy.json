@@ -1,0 +1,141 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"staging_name": {
+			"defaultValue": "staging-demo",
+			"type": "String"
+		},
+		"production_name": {
+			"defaultValue": "production-demo",
+			"type": "String"
+		},
+		"serverfarm_name": {
+			"defaultValue": "farm-demo",
+			"type": "String"
+		}
+	},
+	"variables": {},
+	"resources": [{
+			"type": "Microsoft.Web/serverfarms",
+			"apiVersion": "2016-09-01",
+			"name": "[parameters('serverfarm_name')]",
+			"location": "[resourceGroup().location]",
+			"sku": {
+				"name": "S1",
+				"tier": "Standard",
+				"size": "S1",
+				"family": "S",
+				"capacity": 1
+			},
+			"kind": "app",
+			"properties": {
+				"name": "[parameters('serverfarm_name')]",
+				"perSiteScaling": false,
+				"reserved": false,
+				"targetWorkerCount": 0,
+				"targetWorkerSizeId": 0
+			}
+		},
+		{
+			"type": "Microsoft.Web/sites",
+			"apiVersion": "2016-08-01",
+			"name": "[parameters('production_name')]",
+			"location": "[resourceGroup().location]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Web/serverfarms', parameters('serverfarm_name'))]"
+			],
+			"kind": "app",
+			"properties": {
+				"enabled": true,
+				"hostNameSslStates": [{
+						"name": "[concat(parameters('production_name'), '.azurewebsites.net')]",
+						"sslState": "Disabled",
+						"hostType": "Standard"
+					},
+					{
+						"name": "[concat(parameters('production_name'), '.scm.azurewebsites.net')]",
+						"sslState": "Disabled",
+						"hostType": "Repository"
+					}
+				],
+				"serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarm_name'))]",
+				"reserved": false,
+				"scmSiteAlsoStopped": false,
+				"clientAffinityEnabled": true,
+				"clientCertEnabled": false,
+				"hostNamesDisabled": false,
+				"containerSize": 0,
+				"dailyMemoryTimeQuota": 0,
+				"httpsOnly": false
+			}
+		},
+		{
+			"type": "Microsoft.Web/sites",
+			"apiVersion": "2016-08-01",
+			"name": "[parameters('staging_name')]",
+			"location": "[resourceGroup().location]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Web/serverfarms', parameters('serverfarm_name'))]"
+			],
+			"kind": "app",
+			"properties": {
+				"enabled": true,
+				"hostNameSslStates": [{
+						"name": "[concat(parameters('staging_name'), '.azurewebsites.net')]",
+						"sslState": "Disabled",
+						"hostType": "Standard"
+					},
+					{
+						"name": "[concat(parameters('staging_name'), '.scm.azurewebsites.net')]",
+						"sslState": "Disabled",
+						"hostType": "Repository"
+					}
+				],
+				"serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarm_name'))]",
+				"reserved": false,
+				"scmSiteAlsoStopped": false,
+				"clientAffinityEnabled": true,
+				"clientCertEnabled": false,
+				"hostNamesDisabled": false,
+				"containerSize": 0,
+				"dailyMemoryTimeQuota": 0,
+				"httpsOnly": false
+			}
+		},
+		{
+			"type": "Microsoft.Web/sites/slots",
+			"apiVersion": "2016-08-01",
+			"name": "[concat(parameters('production_name'), '/canary')]",
+			"location": "[resourceGroup().location]",
+			"dependsOn": [
+				"[resourceId('Microsoft.Web/sites', parameters('production_name'))]",
+				"[resourceId('Microsoft.Web/serverfarms', parameters('serverfarm_name'))]"
+			],
+			"kind": "app",
+			"properties": {
+				"enabled": true,
+				"hostNameSslStates": [{
+						"name": "tailwindproduction-canary.azurewebsites.net",
+						"sslState": "Disabled",
+						"hostType": "Standard"
+					},
+					{
+						"name": "tailwindproduction-canary.scm.azurewebsites.net",
+						"sslState": "Disabled",
+						"hostType": "Repository"
+					}
+				],
+				"serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarm_name'))]",
+				"reserved": false,
+				"scmSiteAlsoStopped": false,
+				"clientAffinityEnabled": true,
+				"clientCertEnabled": false,
+				"hostNamesDisabled": false,
+				"containerSize": 0,
+				"dailyMemoryTimeQuota": 0,
+				"httpsOnly": false
+			}
+		}
+	]
+}
