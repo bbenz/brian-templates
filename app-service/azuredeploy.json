@@ -3,15 +3,12 @@
 	"contentVersion": "1.0.0.0",
 	"parameters": {
 		"staging_name": {
-			"defaultValue": "staging-demo",
 			"type": "String"
 		},
 		"production_name": {
-			"defaultValue": "production-demo",
 			"type": "String"
 		},
 		"serverfarm_name": {
-			"defaultValue": "farm-demo",
 			"type": "String"
 		}
 	},
