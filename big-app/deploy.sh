@@ -7,6 +7,9 @@
 
 # read -sp 'Password for Azure SQL - must be strong: ' AZURESQLPASS
 
+apt-get install jq
+cd brian-templates/big-app
+
 RESOURCE_GROUP_NAME=$RESOURCE_GROUP_NAME
 RESOURCE_PREFIX=$RESOURCE_PREFIX
 USERNAME=$USERNAME
