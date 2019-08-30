@@ -88,6 +88,9 @@ az group deployment create -g $RESOURCE_GROUP_NAME --template-file appservicedep
 # *** UNDELETE THE NEXT LINE
 # cd '../../../DEV - Building your Applications for the Cloud/DEV10/deployment'
 
+# NEPETERS
+az acr create -$REGISTRY_NAME -g RESOURCE_GROUP_NAME -sku Classic
+
 printf "\n*** Building Inventory Service image in ACR ***\n"
 az acr build -t $INVENTORY_SERVICE_IMAGE -r $REGISTRY_NAME ../src/inventory-service/InventoryService.Api
 
