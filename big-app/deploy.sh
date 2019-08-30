@@ -34,13 +34,13 @@ PRODUCT_SERVICE_IMAGE='tailwind-product-service:0.1'
 INVENTORY_SERVICE_IMAGE='tailwind-inventory-service:0.1'
 FRONTEND_IMAGE='tailwind-frontend:0.1'
 
-# MAIN_REGION=eastus
+# LOCATION=eastus
 
 # printf "\n*** Setting the subsription to $SUBSCRIPTION***\n"
 # az account set --subscription "$SUBSCRIPTION"
 
 # printf "\n*** Creating resource group $RESOURCE_GROUP_NAME ***\n"
-# az group create -n $RESOURCE_GROUP_NAME -l $MAIN_REGION
+# az group create -n $RESOURCE_GROUP_NAME -l $LOCATION
 
 sleep 20m
 
@@ -78,7 +78,7 @@ git clone https://github.com/Azure-Samples/ignite-tour-lp1s1.git
 
 printf "\n*** Deploying the App Services and Cosmos DB ***\n"
 
-az group deployment create -g $RESOURCE_GROUP_NAME --template-file appservicedeploy.json --parameters prefix=$RESOURCE_PREFIX location=$MAIN_REGION sqlVMIPAddress=$SQL2012_VM_IP_ADDRESS sqlAdminLogin=$USERNAME sqlAdminPassword=$PASSWORD
+az group deployment create -g $RESOURCE_GROUP_NAME --template-file appservicedeploy.json --parameters prefix=$RESOURCE_PREFIX location=$LOCATION sqlVMIPAddress=$SQL2012_VM_IP_ADDRESS sqlAdminLogin=$USERNAME sqlAdminPassword=$PASSWORD
 
 # *** DELETE EVERYTHING TO THE NEXT 3 asterisks
 cd ignite-tour-lp1s1/deployment
@@ -153,7 +153,7 @@ az network vnet subnet create -g $RESOURCE_GROUP_NAME --vnet-name $SQL_MI_VNET_N
 DMS_SUBNET_ID=$(az network vnet subnet show -g $RESOURCE_GROUP_NAME -n $SQL_DMS_SUBNET_NAME --vnet-name $SQL_MI_VNET_NAME | jq -r .id)
 
 printf "\n\n*** Creaeting the SQL Data Migration Service ***\n\n"
-az dms create -g $RESOURCE_GROUP_NAME -l $MAIN_REGION -n $SQL_DMS_NAME \
+az dms create -g $RESOURCE_GROUP_NAME -l $LOCATION -n $SQL_DMS_NAME \
     --sku-name Premium_4vCores --subnet $DMS_SUBNET_ID
 
 printf "\n\n*** Creating VM for Inventory Service ***\n\n"
@@ -186,7 +186,7 @@ sed -i -e "s/REPLACE_SQL_PASSWORD/${PASSWORD}/g" inventoryvmconfigure.sh
 
 # creating the sql server instance
 printf "\n\n *** Creating the Azure Cloud SQL Server Instance ***\n\n"
-az sql server create -l $MAIN_REGION -g $RESOURCE_GROUP_NAME -n $AZ_SQL_NAME -u USERNAME -p AZURESQLPASS
+az sql server create -l $LOCATION -g $RESOURCE_GROUP_NAME -n $AZ_SQL_NAME -u USERNAME -p AZURESQLPASS
 
 chmod +x postprocess.sh
 . postprocess.sh
