@@ -18,6 +18,7 @@ LOCATION=$LOCATION
 printf "\n*** To tail logs, run this command... ***\n"
 echo "*************** Container logs ***************"
 echo "az container logs --name bootstrap-container --resource-group $RESOURCE_GROUP_NAME --follow"
+echo $RESOURCE_PREFIX
 echo "*************** Connection Information ***************"
 
 # NEPETERS
@@ -98,7 +99,7 @@ az group deployment create -g $RESOURCE_GROUP_NAME --template-file appservicedep
 # cd '../../../DEV - Building your Applications for the Cloud/DEV10/deployment'
 
 # NEPETERS
-az acr create --name $REGISTRY_NAME --resource-group $RESOURCE_GROUP_NAME -sku Classic
+az acr create --name $REGISTRY_NAME --resource-group $RESOURCE_GROUP_NAME --sku Classic
 
 printf "\n*** Building Inventory Service image in ACR ***\n"
 az acr build -t $INVENTORY_SERVICE_IMAGE -r $REGISTRY_NAME ../src/inventory-service/InventoryService.Api
