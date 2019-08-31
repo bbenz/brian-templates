@@ -84,7 +84,7 @@ az network nsg rule create -n MongoDB --nsg-name "${MONGO_VM_NAME}NSG" -g $RESOU
 # *** DELETE EVERYTHING TO THE NEXT 3 asterisks
 
 # printf "\n*** Cloning into DEV10: Designing Resilient Cloud Applications repository ***\n"
-# git clone https://github.com/Azure-Samples/ignite-tour-lp1s1.git
+git clone https://github.com/Azure-Samples/ignite-tour-lp1s1.git
 
 # *** DONE DELETING
 
