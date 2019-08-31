@@ -185,6 +185,11 @@ INVENTORY_VM_IP_ADDRESS=$(az vm list-ip-addresses -g $RESOURCE_GROUP_NAME -n $IN
 printf "\n\n*** Configuring the Frontend to point at the Inventory Service VM***\n\n"
 az webapp config appsettings set -n $FRONTEND_NAME -g $RESOURCE_GROUP_NAME --settings "INVENTORY_SERVICE_BASE_URL=http://$INVENTORY_VM_IP_ADDRESS:8080"
 
+echo "****************"
+pwd
+ls
+echo "****************"
+
 sed -i -e "s/INVENTORY_VM_IP_ADDRESS/${INVENTORY_VM_IP_ADDRESS}/g" inventorypostprocess.sh
 
 printf "\n\n *** Configuring the post-processing Inventory VM script ***\n\n"
