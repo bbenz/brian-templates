@@ -7,15 +7,22 @@
 
 # read -sp 'Password for Azure SQL - must be strong: ' AZURESQLPASS
 
-apt-get install jq -y
-cd brian-templates/big-app
-
 RESOURCE_GROUP_NAME=$RESOURCE_GROUP_NAME
 RESOURCE_PREFIX=$RESOURCE_PREFIX
 USERNAME=$USERNAME
 PASSWORD=$PASSWORD
 AZURESQLPASS=$AZURESQLPASS
 LOCATION=$LOCATION
+
+# Print out tail command
+printf "\n*** To tail logs, run this command... ***\n"
+echo "*************** Container logs ***************"
+echo "az container logs --name bootstrap-container --resource-group $RESOURCE_GROUP_NAME --follow"
+echo "*************** Connection Information ***************"
+
+# NEPETERS
+apt-get install jq -y
+cd brian-templates/big-app
 
 echo "Welcome to Tailwind Traders Data Migration!!"
 
