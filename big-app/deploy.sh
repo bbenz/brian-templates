@@ -14,13 +14,6 @@ PASSWORD=$PASSWORD
 AZURESQLPASS=$AZURESQLPASS
 LOCATION=$LOCATION
 
-# Print out tail command
-printf "\n*** To tail logs, run this command... ***\n"
-echo "*************** Container logs ***************"
-echo "az container logs --name bootstrap-container --resource-group $RESOURCE_GROUP_NAME --follow"
-echo $RESOURCE_PREFIX
-echo "*************** Connection Information ***************"
-
 # NEPETERS
 apt-get install jq -y
 cd brian-templates/big-app
@@ -44,6 +37,14 @@ MONGO_VM_NAME='mongo'
 PRODUCT_SERVICE_IMAGE='tailwind-product-service:0.1'
 INVENTORY_SERVICE_IMAGE='tailwind-inventory-service:0.1'
 FRONTEND_IMAGE='tailwind-frontend:0.1'
+
+# Print out tail command
+printf "\n*** To tail logs, run this command... ***\n"
+echo "*************** Container logs ***************"
+echo "az container logs --name bootstrap-container --resource-group $RESOURCE_GROUP_NAME --follow"
+echo $RESOURCE_PREFIX
+echo $AZ_SQL_NAME
+echo "*************** Connection Information ***************"
 
 
 # NEPETERS

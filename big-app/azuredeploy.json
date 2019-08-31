@@ -116,11 +116,15 @@
                             },
                             {
 								"name": "AZURESQLPASS",
-								"secureValue": "[parameters('PASSWORD')]"
+								"secureValue": "[parameters('AZURESQLPASS')]"
 							},
 							{
 								"name": "LOCATION",
 								"secureValue": "[resourceGroup().location]"
+							},
+							{
+								"name": "RESOURCE_PREFIX",
+								"secureValue": "[parameters('RESOURCE_PREFIX')]"
 							}
 						]
 					}
