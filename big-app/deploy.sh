@@ -44,6 +44,8 @@ PRODUCT_SERVICE_IMAGE='tailwind-product-service:0.1'
 INVENTORY_SERVICE_IMAGE='tailwind-inventory-service:0.1'
 FRONTEND_IMAGE='tailwind-frontend:0.1'
 
+
+# NEPETERS
 # LOCATION=eastus
 
 # printf "\n*** Setting the subsription to $SUBSCRIPTION***\n"
@@ -96,7 +98,7 @@ az group deployment create -g $RESOURCE_GROUP_NAME --template-file appservicedep
 # cd '../../../DEV - Building your Applications for the Cloud/DEV10/deployment'
 
 # NEPETERS
-az acr create --name $REGISTRY_NAME --resource-group RESOURCE_GROUP_NAME -sku Classic
+az acr create --name $REGISTRY_NAME --resource-group $RESOURCE_GROUP_NAME -sku Classic
 
 printf "\n*** Building Inventory Service image in ACR ***\n"
 az acr build -t $INVENTORY_SERVICE_IMAGE -r $REGISTRY_NAME ../src/inventory-service/InventoryService.Api
