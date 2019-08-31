@@ -137,12 +137,12 @@ FRONTEND_BASE_URL="http://$(az webapp show -n $FRONTEND_NAME -g $RESOURCE_GROUP_
 
 # *** DELETE EVERYTHING TO THE NEXT 3 asterisks
 # Finished with app service, go back to top level directory
-cd ..
-cd ..
+# cd ..
+# cd ..
 
-pwd
+# pwd
 
-rm -rf ignite-tour-lp1s1
+# rm -rf ignite-tour-lp1s1
 
 # *** Done deleting
 
