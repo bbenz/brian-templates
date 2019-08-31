@@ -83,8 +83,8 @@ az network nsg rule create -n MongoDB --nsg-name "${MONGO_VM_NAME}NSG" -g $RESOU
 
 # *** DELETE EVERYTHING TO THE NEXT 3 asterisks
 
-printf "\n*** Cloning into DEV10: Designing Resilient Cloud Applications repository ***\n"
-git clone https://github.com/Azure-Samples/ignite-tour-lp1s1.git
+# printf "\n*** Cloning into DEV10: Designing Resilient Cloud Applications repository ***\n"
+# git clone https://github.com/Azure-Samples/ignite-tour-lp1s1.git
 
 # *** DONE DELETING
 
@@ -98,9 +98,6 @@ az group deployment create -g $RESOURCE_GROUP_NAME --template-file appservicedep
 
 # *** UNDELETE THE NEXT LINE
 # cd '../../../DEV - Building your Applications for the Cloud/DEV10/deployment'
-
-# NEPETERS
-az acr create --name $REGISTRY_NAME --resource-group $RESOURCE_GROUP_NAME --sku Classic
 
 printf "\n*** Building Inventory Service image in ACR ***\n"
 az acr build -t $INVENTORY_SERVICE_IMAGE -r $REGISTRY_NAME ../src/inventory-service/InventoryService.Api
