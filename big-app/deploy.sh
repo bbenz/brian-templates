@@ -197,18 +197,26 @@ printf "\n\n *** Configuring the post-processing Inventory VM script ***\n\n"
 echo $ACR_USERNAME
 echo $ACR_PASSWORD
 echo $ACR_SERVER
-echo $INVENTORY_SERVICE_IMAGE}
+echo $INVENTORY_SERVICE_IMAGE
 echo $SQL2012_VM_IP_ADDRESS
 echo $USERNAME
 echo $PASSWORD
 
+echo "1"
 sed -i -e "s/REPLACE_CONTAINER_REGISTRY_USERNAME/${ACR_USERNAME}/g" inventoryvmconfigure.sh
+echo "2"
 sed -i -e "s/REPLACE_CONTAINER_REGISTRY_PASSWORD/${ACR_PASSWORD}/g" inventoryvmconfigure.sh
+echo "3"
 sed -i -e "s/REPLACE_CONTAINER_REGISTRY_SERVER/${ACR_SERVER}/g" inventoryvmconfigure.sh
+echo "4"
 sed -i -e "s/REPLACE_INVENTORY_IMAGE_NAME/${INVENTORY_SERVICE_IMAGE}/g" inventoryvmconfigure.sh
+echo "5"
 sed -i -e "s/REPLACE_SQL_IP/${SQL2012_VM_IP_ADDRESS}/g" inventoryvmconfigure.sh
+echo "6"
 sed -i -e "s/REPLACE_SQL_USERNAME/${USERNAME}/g" inventoryvmconfigure.sh
+echo "7"
 sed -i -e "s/REPLACE_SQL_PASSWORD/${PASSWORD}/g" inventoryvmconfigure.sh
+echo "8"
 
 # creating the sql server instance
 printf "\n\n *** Creating the Azure Cloud SQL Server Instance ***\n\n"
