@@ -206,7 +206,7 @@ echo "1"
 sed -i -e "s/REPLACE_CONTAINER_REGISTRY_USERNAME/${ACR_USERNAME}/g" inventoryvmconfigure.sh
 echo "2"
 # NEPETERS - failing due to / in value
-sed -i -e 's/REPLACE_CONTAINER_REGISTRY_PASSWORD//${ACR_PASSWORD}/g' inventoryvmconfigure.sh
+sed -i -e 's#REPLACE_CONTAINER_REGISTRY_PASSWORD#${ACR_PASSWORD}#g' inventoryvmconfigure.sh
 echo "3"
 sed -i -e "s/REPLACE_CONTAINER_REGISTRY_SERVER/${ACR_SERVER}/g" inventoryvmconfigure.sh
 echo "4"
