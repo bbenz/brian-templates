@@ -205,7 +205,8 @@ echo $PASSWORD
 echo "1"
 sed -i -e "s/REPLACE_CONTAINER_REGISTRY_USERNAME/${ACR_USERNAME}/g" inventoryvmconfigure.sh
 echo "2"
-sed -i -e "s/REPLACE_CONTAINER_REGISTRY_PASSWORD/${ACR_PASSWORD}/g" inventoryvmconfigure.sh
+# NEPETERS - failing due to / in value
+sed -i -e 's/REPLACE_CONTAINER_REGISTRY_PASSWORD//${ACR_PASSWORD}/g' inventoryvmconfigure.sh
 echo "3"
 sed -i -e "s/REPLACE_CONTAINER_REGISTRY_SERVER/${ACR_SERVER}/g" inventoryvmconfigure.sh
 echo "4"
@@ -221,8 +222,6 @@ echo "8"
 # creating the sql server instance
 printf "\n\n *** Creating the Azure Cloud SQL Server Instance ***\n\n"
 az sql server create -l $LOCATION -g $RESOURCE_GROUP_NAME -n $AZ_SQL_NAME -u $USERNAME -p $AZURESQLPASS
-
-pwd
 
 sleep 30m
 
