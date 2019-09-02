@@ -1,24 +1,9 @@
-# read -p 'Subscription to use: ' SUBSCRIPTION
-# read -p 'New resource group name: ' RESOURCE_GROUP_NAME
-# read -p 'Unique prefix (all lowercase - applied to all resources): ' RESOURCE_PREFIX
-# read -p 'Username (applied to all resources): ' USERNAME
-# read -sp 'Password (applied to all resources, except Azure SQL - no exclamation points): ' PASSWORD
-# echo ""
-
-# read -sp 'Password for Azure SQL - must be strong: ' AZURESQLPASS
-
 RESOURCE_GROUP_NAME=$RESOURCE_GROUP_NAME
 RESOURCE_PREFIX=$RESOURCE_PREFIX
 USERNAME=$USERNAME
 PASSWORD=$PASSWORD
 AZURESQLPASS=$AZURESQLPASS
 LOCATION=$LOCATION
-
-# NEPETERS
-apt-get install jq -y
-cd brian-templates/big-app
-
-echo "Welcome to Tailwind Traders Data Migration!!"
 
 REGISTRY_NAME="$RESOURCE_PREFIX"registry
 PRODUCT_SERVICE_NAME="$RESOURCE_PREFIX"product
@@ -42,19 +27,12 @@ FRONTEND_IMAGE='tailwind-frontend:0.1'
 printf "\n*** To tail logs, run this command... ***\n"
 echo "*************** Container logs ***************"
 echo "az container logs --name bootstrap-container --resource-group $RESOURCE_GROUP_NAME --follow"
-echo $RESOURCE_PREFIX
-echo $AZ_SQL_NAME
 echo "*************** Connection Information ***************"
 
+apt-get install jq -y
+cd brian-templates/big-app
 
-# NEPETERS
-# LOCATION=eastus
-
-# printf "\n*** Setting the subsription to $SUBSCRIPTION***\n"
-# az account set --subscription "$SUBSCRIPTION"
-
-# printf "\n*** Creating resource group $RESOURCE_GROUP_NAME ***\n"
-# az group create -n $RESOURCE_GROUP_NAME -l $LOCATION
+echo "Welcome to Tailwind Traders Data Migration!!"
 
 printf "\n*** Creating the SQL Server 2012 Virtual Machine (can take 20 minutes) ***\n"
 az group deployment create -g $RESOURCE_GROUP_NAME --template-file sqlvmdeploy.json \
@@ -184,40 +162,16 @@ INVENTORY_VM_IP_ADDRESS=$(az vm list-ip-addresses -g $RESOURCE_GROUP_NAME -n $IN
 
 printf "\n\n*** Configuring the Frontend to point at the Inventory Service VM***\n\n"
 az webapp config appsettings set -n $FRONTEND_NAME -g $RESOURCE_GROUP_NAME --settings "INVENTORY_SERVICE_BASE_URL=http://$INVENTORY_VM_IP_ADDRESS:8080"
-
-echo "****************"
-pwd
-ls
-echo "****************"
-
 sed -i -e "s/INVENTORY_VM_IP_ADDRESS/${INVENTORY_VM_IP_ADDRESS}/g" inventorypostprocess.sh
 
 printf "\n\n *** Configuring the post-processing Inventory VM script ***\n\n"
-
-echo $ACR_USERNAME
-echo $ACR_PASSWORD
-echo $ACR_SERVER
-echo $INVENTORY_SERVICE_IMAGE
-echo $SQL2012_VM_IP_ADDRESS
-echo $USERNAME
-echo $PASSWORD
-
-echo "1"
 sed -i -e "s/REPLACE_CONTAINER_REGISTRY_USERNAME/${ACR_USERNAME}/g" inventoryvmconfigure.sh
-echo "2"
-# NEPETERS - failing due to / in value
 sed -i -e 's#REPLACE_CONTAINER_REGISTRY_PASSWORD#${ACR_PASSWORD}#g' inventoryvmconfigure.sh
-echo "3"
 sed -i -e "s/REPLACE_CONTAINER_REGISTRY_SERVER/${ACR_SERVER}/g" inventoryvmconfigure.sh
-echo "4"
 sed -i -e "s/REPLACE_INVENTORY_IMAGE_NAME/${INVENTORY_SERVICE_IMAGE}/g" inventoryvmconfigure.sh
-echo "5"
 sed -i -e "s/REPLACE_SQL_IP/${SQL2012_VM_IP_ADDRESS}/g" inventoryvmconfigure.sh
-echo "6"
 sed -i -e "s/REPLACE_SQL_USERNAME/${USERNAME}/g" inventoryvmconfigure.sh
-echo "7"
 sed -i -e "s/REPLACE_SQL_PASSWORD/${PASSWORD}/g" inventoryvmconfigure.sh
-echo "8"
 
 # creating the sql server instance
 printf "\n\n *** Creating the Azure Cloud SQL Server Instance ***\n\n"
@@ -231,15 +185,15 @@ chmod +x postprocess.sh
 chmod +x inventorypostprocess.sh
 . inventorypostprocess.sh
 
-# printf "\n******************************************************\n"
-# printf "\n*** Deployment to $RESOURCE_GROUP_NAME completed ***\n"
-# printf "\n******************************************************\n"
+printf "\n******************************************************\n"
+printf "\n*** Deployment to $RESOURCE_GROUP_NAME completed ***\n"
+printf "\n******************************************************\n"
 
-# printf "\n*** You're going to want to write all of the following down:*** \n"
-# printf "Front end url: $FRONTEND_BASE_URL\n"
-# printf "Product service url: $PRODUCT_SERVICE_BASE_URL\n"
-# printf "MongoDB VM connection string: $MONGODB_CONNECTION_STRING\n"
-# printf "SQL VM IP address: $SQL2012_VM_IP_ADDRESS\n"
-# printf "Inventory service VM url: http://${INVENTORY_VM_IP_FQDN}:8080\n"
-# printf "MongoDB VM IP address: $MONGO_IP_ADDRESS\n"
-# printf "\n *** All the other info will be found in the portal under the resource group ***\n\n"
+printf "\n*** You're going to want to write all of the following down:*** \n"
+printf "Front end url: $FRONTEND_BASE_URL\n"
+printf "Product service url: $PRODUCT_SERVICE_BASE_URL\n"
+printf "MongoDB VM connection string: $MONGODB_CONNECTION_STRING\n"
+printf "SQL VM IP address: $SQL2012_VM_IP_ADDRESS\n"
+printf "Inventory service VM url: http://${INVENTORY_VM_IP_FQDN}:8080\n"
+printf "MongoDB VM IP address: $MONGO_IP_ADDRESS\n"
+printf "\n *** All the other info will be found in the portal under the resource group ***\n\n"
