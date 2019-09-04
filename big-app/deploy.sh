@@ -195,3 +195,5 @@ printf "SQL VM IP address: $SQL2012_VM_IP_ADDRESS\n"
 printf "Inventory service VM url: http://${INVENTORY_VM_IP_FQDN}:8080\n"
 printf "MongoDB VM IP address: $MONGO_IP_ADDRESS\n"
 printf "\n *** All the other info will be found in the portal under the resource group ***\n\n"
+
+sleep 120m
