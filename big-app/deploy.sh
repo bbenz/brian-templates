@@ -48,7 +48,7 @@ sed -i -e "s/REPLACEPASSWORD/${PASSWORD}/g" mongoconfigure.sh
 
 az vm create --resource-group $RESOURCE_GROUP_NAME --name $MONGO_VM_NAME \
     --size Standard_D2s_v3 --image UbuntuLTS --custom-data mongocloudinit.sh \
-    --admin-username azureuser --admin-password $PASSWORD
+    --admin-username azureuser --generate-ssh-keys
 
 az vm user update -u azureuser --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -g $RESOURCE_GROUP_NAME -n $MONGO_VM_NAME
 
@@ -148,7 +148,7 @@ az dms create -g $RESOURCE_GROUP_NAME -l $LOCATION -n $SQL_DMS_NAME \
 
 printf "\n\n*** Creating VM for Inventory Service ***\n\n"
 az vm create --resource-group $RESOURCE_GROUP_NAME --name $INVENTORY_SERVICE_VM_NAME --size Standard_D2s_v3 \
-    --image UbuntuLTS --admin-username azureuser --admin-password $PASSWORD --subnet $DMS_SUBNET_ID --custom-data cloudinitdocker.txt
+    --image UbuntuLTS --admin-username azureuser --generate-ssh-keys --subnet $DMS_SUBNET_ID --custom-data cloudinitdocker.txt
 
 # az vm user update -u azureuser --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -g $RESOURCE_GROUP_NAME -n $INVENTORY_SERVICE_VM_NAME
 
