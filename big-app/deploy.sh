@@ -166,7 +166,7 @@ sed -i -e "s/INVENTORY_VM_IP_ADDRESS/${INVENTORY_VM_IP_ADDRESS}/g" inventorypost
 
 printf "\n\n *** Configuring the post-processing Inventory VM script ***\n\n"
 sed -i -e "s/REPLACE_CONTAINER_REGISTRY_USERNAME/${ACR_USERNAME}/g" inventoryvmconfigure.sh
-sed -i -e 's#REPLACE_CONTAINER_REGISTRY_PASSWORD#${ACR_PASSWORD}#g' inventoryvmconfigure.sh
+sed -i -e 's/REPLACE_CONTAINER_REGISTRY_PASSWORD/${ACR_PASSWORD}/g' inventoryvmconfigure.sh
 sed -i -e "s/REPLACE_CONTAINER_REGISTRY_SERVER/${ACR_SERVER}/g" inventoryvmconfigure.sh
 sed -i -e "s/REPLACE_INVENTORY_IMAGE_NAME/${INVENTORY_SERVICE_IMAGE}/g" inventoryvmconfigure.sh
 sed -i -e "s/REPLACE_SQL_IP/${SQL2012_VM_IP_ADDRESS}/g" inventoryvmconfigure.sh
