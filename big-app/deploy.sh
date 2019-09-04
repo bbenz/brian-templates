@@ -48,7 +48,7 @@ sed -i -e "s/REPLACEPASSWORD/${PASSWORD}/g" mongoconfigure.sh
 
 az vm create --resource-group $RESOURCE_GROUP_NAME --name $MONGO_VM_NAME \
     --size Standard_D2s_v3 --image UbuntuLTS --custom-data mongocloudinit.sh \
-    --admin-username azureuser --generate-ssh-keys
+    --admin-username azureuser --admin-password $PASSWORD
 
 az vm user update -u azureuser --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -g $RESOURCE_GROUP_NAME -n $MONGO_VM_NAME
 
@@ -148,9 +148,9 @@ az dms create -g $RESOURCE_GROUP_NAME -l $LOCATION -n $SQL_DMS_NAME \
 
 printf "\n\n*** Creating VM for Inventory Service ***\n\n"
 az vm create --resource-group $RESOURCE_GROUP_NAME --name $INVENTORY_SERVICE_VM_NAME --size Standard_D2s_v3 \
-    --image UbuntuLTS --admin-username azureuser --generate-ssh-keys --subnet $DMS_SUBNET_ID --custom-data cloudinitdocker.sh
+    --image UbuntuLTS --admin-username azureuser --admin-password $PASSWORD --subnet $DMS_SUBNET_ID --custom-data cloudinitdocker.txt
 
-az vm user update -u azureuser --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -g $RESOURCE_GROUP_NAME -n $INVENTORY_SERVICE_VM_NAME
+# az vm user update -u azureuser --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -g $RESOURCE_GROUP_NAME -n $INVENTORY_SERVICE_VM_NAME
 
 INVENTORY_VM_IP_NAME=$(az vm list-ip-addresses -g $RESOURCE_GROUP_NAME -n $INVENTORY_SERVICE_VM_NAME | jq -r '.[0].virtualMachine.network.publicIpAddresses[0].name')
 INVENTORY_VM_IP_FQDN=$(az network public-ip update -g $RESOURCE_GROUP_NAME -n $INVENTORY_VM_IP_NAME --dns-name $INVENTORY_SERVICE_VM_NAME | jq -r .dnsSettings.fqdn)
