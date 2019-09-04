@@ -182,23 +182,23 @@ pwd
 ls
 echo "************"
 
-sleep 30m
+sleep 10m
 
-chmod +x postprocess.sh
-. postprocess.sh
+# chmod +x postprocess.sh
+sh postprocess.sh
 
-chmod +x inventorypostprocess.sh
-. inventorypostprocess.sh
+# chmod +x inventorypostprocess.sh
+sh inventorypostprocess.sh
 
-# printf "\n******************************************************\n"
-# printf "\n*** Deployment to $RESOURCE_GROUP_NAME completed ***\n"
-# printf "\n******************************************************\n"
+printf "\n******************************************************\n"
+printf "\n*** Deployment to $RESOURCE_GROUP_NAME completed ***\n"
+printf "\n******************************************************\n"
 
-# printf "\n*** You're going to want to write all of the following down:*** \n"
-# printf "Front end url: $FRONTEND_BASE_URL\n"
-# printf "Product service url: $PRODUCT_SERVICE_BASE_URL\n"
-# printf "MongoDB VM connection string: $MONGODB_CONNECTION_STRING\n"
-# printf "SQL VM IP address: $SQL2012_VM_IP_ADDRESS\n"
-# printf "Inventory service VM url: http://${INVENTORY_VM_IP_FQDN}:8080\n"
-# printf "MongoDB VM IP address: $MONGO_IP_ADDRESS\n"
-# printf "\n *** All the other info will be found in the portal under the resource group ***\n\n"
+printf "\n*** You're going to want to write all of the following down:*** \n"
+printf "Front end url: $FRONTEND_BASE_URL\n"
+printf "Product service url: $PRODUCT_SERVICE_BASE_URL\n"
+printf "MongoDB VM connection string: $MONGODB_CONNECTION_STRING\n"
+printf "SQL VM IP address: $SQL2012_VM_IP_ADDRESS\n"
+printf "Inventory service VM url: http://${INVENTORY_VM_IP_FQDN}:8080\n"
+printf "MongoDB VM IP address: $MONGO_IP_ADDRESS\n"
+printf "\n *** All the other info will be found in the portal under the resource group ***\n\n"
