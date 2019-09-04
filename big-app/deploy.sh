@@ -177,13 +177,6 @@ sed -i -e "s/REPLACE_SQL_PASSWORD/${PASSWORD}/g" inventoryvmconfigure.sh
 printf "\n\n *** Creating the Azure Cloud SQL Server Instance ***\n\n"
 az sql server create -l $LOCATION -g $RESOURCE_GROUP_NAME -n $AZ_SQL_NAME -u $USERNAME -p $AZURESQLPASS
 
-echo "************"
-pwd
-ls
-echo "************"
-
-sleep 10m
-
 # chmod +x postprocess.sh
 sh postprocess.sh
 
