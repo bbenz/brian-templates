@@ -1,0 +1,665 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"prefix": {
+			"type": "string"
+        },
+        "adminUsername": {
+            "type": "string",
+            "defaultValue": "username"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        }
+	},
+	"variables": {
+		"hostingPlanName": "[concat(parameters('prefix'), 'plan')]",
+		"frontendName": "[concat(parameters('prefix'), 'frontend')]",
+		"productServiceName": "[concat(parameters('prefix'), 'product')]",
+		"cosmosDbName": "[concat(parameters('prefix'), 'cosmosdb')]",
+		"hostingEnvironment": "",
+		"location": "[resourceGroup().location]",
+		"sku": "PremiumV2",
+		"skuCode": "P1v2",
+        "workerSize": 3,
+        "virtualMachineName": "sql2012",
+        "networkInterfaceName": "sql2012396",
+        "virtualNetworkName": "vnet1",
+        "networkSecurityGroupName": "sql2012-nsg",
+        "virtualMachineSize": "Standard_D2s_v3",
+        "addressPrefix": "172.16.2.0/24",
+        "subnetName": "default",
+        "publicIpAddressSku": "Basic",
+        "subnetPrefix": "172.16.2.0/24",
+        "publicIpAddressName": "sql2012-ip",
+        "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
+        "publicIpAddressType": "Dynamic",
+        "virtualMachineNameMongo": "mongo",
+        "networkInterfaceNameMongo": "mongonic",
+        "publicIpAddressNameMongo": "mongo-ip",
+        "virtualMachineNameInventory": "inventory",
+        "networkInterfaceNameInventory": "inventoryic",
+        "publicIpAddressNameInventory": "inventory-ip",
+        "DMSServiceName": "[concat('DMS', uniqueString(resourceGroup().id))]",
+        "defaultSubnetName": "default",
+        "adVNet": "AzureDataMigrationServiceTemplateRG-vnet",
+        "azureSQLServerName": "[concat('azureSQLServer', uniqueString(resourceGroup().id))]"
+	},
+	"resources": [
+        {
+			"apiVersion": "2016-09-01",
+			"name": "[variables('hostingPlanName')]",
+			"type": "Microsoft.Web/serverfarms",
+			"location": "[variables('location')]",
+			"properties": {
+				"name": "[variables('hostingPlanName')]",
+				"workerSizeId": "[variables('workerSize')]",
+				"reserved": true,
+				"numberOfWorkers": "1",
+				"hostingEnvironment": ""
+			},
+			"sku": {
+				"Tier": "[variables('sku')]",
+				"Name": "[variables('skuCode')]"
+			},
+			"kind": "linux"
+		},
+		{
+			"apiVersion": "2016-03-01",
+			"name": "[variables('frontendName')]",
+			"type": "Microsoft.Web/sites",
+			"properties": {
+				"name": "[variables('frontendName')]",
+				"siteConfig": {
+					"appSettings": [{
+							"name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+							"value": "false"
+						},
+						{
+							"name": "WEBSITE_HTTPLOGGING_RETENTION_DAYS",
+							"value": "0"
+						}
+					],
+					"appCommandLine": "",
+					"linuxFxVersion": "DOCKER|neilpeterson/tailwind-frontend:0.1"
+				},
+				"serverFarmId": "[concat('/subscriptions/', subscription().subscriptionId,'/resourcegroups/', resourceGroup().name, '/providers/Microsoft.Web/serverfarms/', variables('hostingPlanName'))]",
+				"hostingEnvironment": "[variables('hostingEnvironment')]"
+			},
+			"location": "[variables('location')]",
+			"dependsOn": [
+				"[concat('Microsoft.Web/serverfarms/', variables('hostingPlanName'))]"
+			]
+		},
+		{
+			"apiVersion": "2016-03-01",
+			"name": "[variables('productServiceName')]",
+			"type": "Microsoft.Web/sites",
+			"properties": {
+				"name": "[variables('productServiceName')]",
+				"siteConfig": {
+					"appSettings": [{
+							"name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+							"value": "false"
+						},
+						{
+							"name": "WEBSITE_HTTPLOGGING_RETENTION_DAYS",
+							"value": "0"
+						}
+					],
+					"appCommandLine": "",
+					"linuxFxVersion": "DOCKER|neilpeterson/tailwind-product-service:0.1"
+				},
+				"serverFarmId": "[concat('/subscriptions/', subscription().subscriptionId,'/resourcegroups/', resourceGroup().name, '/providers/Microsoft.Web/serverfarms/', variables('hostingPlanName'))]",
+				"hostingEnvironment": "[variables('hostingEnvironment')]"
+			},
+			"location": "[variables('location')]",
+			"dependsOn": [
+				"[concat('Microsoft.Web/serverfarms/', variables('hostingPlanName'))]"
+			]
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('adVNet')]",
+            "apiVersion": "2018-02-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.2.0.0/24"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.2.0.0/24"
+                        }
+                    }
+                ],
+                "enableDdosProtection": false,
+                "enableVmProtection": false
+            },
+            "resources": [
+                {
+                    "type": "subnets",
+                    "name": "[variables('defaultSubnetName')]",
+                    "apiVersion": "2018-02-01",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/virtualNetworks', variables('adVNet'))]"
+                    ],
+                    "properties": {
+                        "addressPrefix": "10.2.0.0/24"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "Microsoft.DataMigration/services",
+            "sku": {
+                "name": "Standard_1vCores",
+                "tier": "Standard",
+                "size": "1 vCores"
+            },
+            "name": "[variables('DMSServiceName')]",
+            "apiVersion": "2017-11-15-privatepreview",
+            "location": "[variables('location')]",
+            "properties": {
+                "virtualSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('adVNet'), variables('defaultSubnetName'))]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('adVNet'), variables('defaultSubnetName'))]"
+            ]
+        },
+		{
+			"apiVersion": "2015-04-08",
+			"type": "Microsoft.DocumentDb/databaseAccounts",
+			"name": "[variables('cosmosDbName')]",
+			"location": "[variables('location')]",
+			"properties": {
+				"databaseAccountOfferType": "Standard",
+				"locations": [{
+					"id": "[concat(variables('cosmosDbName'), '-', variables('location'))]",
+					"failoverPriority": 0,
+					"locationName": "[variables('location')]"
+				}],
+				"enableMultipleWriteLocations": true,
+				"isVirtualNetworkFilterEnabled": false,
+				"virtualNetworkRules": [],
+				"dependsOn": []
+			},
+			"tags": {
+				"defaultExperience": "MongoDB"
+			}
+        },
+        {
+            "type": "Microsoft.Sql/servers",
+            "name": "[concat(variables('azureSQLServerName'))]",
+            "apiVersion": "2015-05-01-preview",
+            "location": "[variables('location')]",
+            "properties": {
+                "administratorLogin": "[parameters('adminUsername')]",
+                "administratorLoginPassword": "[parameters('adminPassword')]",
+                "version": "12.0"
+            }
+        },
+        {
+            "name": "[variables('networkSecurityGroupName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2018-08-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "Port_1433",
+                        "properties": {
+                            "priority": 1001,
+                            "protocol": "*",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceApplicationSecurityGroups": [],
+                            "destinationApplicationSecurityGroups": [],
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "1433"
+                        }
+                    },
+                    {
+                        "name": "Port_1433_Tag_Azure",
+                        "properties": {
+                            "priority": 1002,
+                            "protocol": "*",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceApplicationSecurityGroups": [],
+                            "destinationApplicationSecurityGroups": [],
+                            "sourceAddressPrefix": "AzureCloud",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "1433"
+                        }
+                    },
+                    {
+                        "name": "default-allow-rdp",
+                        "properties": {
+                            "priority": 1000,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceApplicationSecurityGroups": [],
+                            "destinationApplicationSecurityGroups": [],
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "3389"
+                        }
+                    },
+                    {
+                        "name": "default-allow-sql",
+                        "properties": {
+                            "priority": 1500,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceApplicationSecurityGroups": [],
+                            "destinationApplicationSecurityGroups": [],
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "1433"
+                        }
+                    },
+                    {
+                        "name": "default-allow-mongo",
+                        "properties": {
+                            "priority": 500,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceApplicationSecurityGroups": [],
+                            "destinationApplicationSecurityGroups": [],
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "27017"
+                        }
+                    },
+                    {
+                        "name": "default-allow-inventory",
+                        "properties": {
+                            "priority": 600,
+                            "protocol": "TCP",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourceApplicationSecurityGroups": [],
+                            "destinationApplicationSecurityGroups": [],
+                            "sourceAddressPrefix": "*",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*",
+                            "destinationPortRange": "8080"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('virtualNetworkName')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2018-08-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+            ],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnetName')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnetPrefix')]",
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('virtualMachineName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2018-06-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[variables('virtualMachineName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVmAgent": "true"
+                    }
+                },
+                "hardwareProfile": {
+                    "vmSize": "[variables('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftSQLServer",
+                        "offer": "SQL2012SP4-WS2012R2",
+                        "sku": "Enterprise",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS"
+                        }
+                    },
+                    "dataDisks": [
+                        {
+                            "createOption": "empty",
+                            "lun": 0,
+                            "diskSizeGB": "1023",
+                            "caching": "ReadOnly",
+                            "managedDisk": {
+                                "storageAccountType": "Premium_LRS"
+                            }
+                        }
+                    ]
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                        }
+                    ]
+                }
+            }
+        },
+       {
+            "apiVersion": "2015-06-15",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('virtualMachineName'), '/SqlIaasExtension')]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('virtualMachineName'))]"
+            ],
+            "properties": {
+                "type": "SqlIaaSAgent",
+                "publisher": "Microsoft.SqlServer.Management",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": "true",
+                "settings": {
+                    "AutoTelemetrySettings": {
+                        "Region": "[variables('location')]"
+                    },
+                    "AutoPatchingSettings": {
+                        "PatchCategory": "WindowsMandatoryUpdates",
+                        "Enable": true,
+                        "DayOfWeek": "Sunday",
+                        "MaintenanceWindowStartingHour": "2",
+                        "MaintenanceWindowDuration": "60"
+                    },
+                    "KeyVaultCredentialSettings": {
+                        "Enable": false,
+                        "CredentialName": ""
+                    },
+                    "ServerConfigurationsManagementSettings": {
+                        "SQLConnectivityUpdateSettings": {
+                            "ConnectivityType": "Public",
+                            "Port": 1433
+                        },
+                        "SQLWorkloadTypeUpdateSettings": {
+                            "SQLWorkloadType": "GENERAL"
+                        },
+                        "SQLStorageUpdateSettings": {
+                            "DiskCount": 1,
+                            "NumberOfColumns": 1,
+                            "StartingDeviceID": 2,
+                            "DiskConfigurationType": "NEW"
+                        },
+                        "AdditionalFeaturesServerConfigurations": {
+                            "IsRServicesEnabled": "false"
+                        }
+                    }
+                },
+                "protectedSettings": {
+                    "SQLAuthUpdateUserName": "[parameters('adminUsername')]",
+                    "SQLAuthUpdatePassword": "[parameters('adminPassword')]"
+                }
+            }
+        },
+        {
+            "name": "[variables('networkInterfaceName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-04-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId(resourceGroup().name,'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('publicIpAddressName')]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2018-08-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
+            },
+            "sku": {
+                "name": "[variables('publicIpAddressSku')]"
+            }
+        },
+        {
+            "name": "[variables('virtualMachineNameMongo')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2018-06-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceNameMongo'))]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[variables('virtualMachineNameMongo')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+					"linuxConfiguration": {
+						"disablePasswordAuthentication": false
+					}
+                },
+                "hardwareProfile": {
+                    "vmSize": "[variables('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "18.04-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS"
+                        }
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNameMongo'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "[variables('networkInterfaceNameMongo')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-04-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressNameMongo'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId(resourceGroup().name,'Microsoft.Network/publicIpAddresses', variables('publicIpAddressNameMongo'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('publicIpAddressNameMongo')]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2018-08-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
+            },
+            "sku": {
+                "name": "[variables('publicIpAddressSku')]"
+            }
+        },
+        {
+            "name": "[variables('virtualMachineNameInventory')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2018-06-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceNameInventory'))]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[variables('virtualMachineNameInventory')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+					"linuxConfiguration": {
+						"disablePasswordAuthentication": false
+					}
+                },
+                "hardwareProfile": {
+                    "vmSize": "[variables('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "18.04-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS"
+                        }
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceNameInventory'))]"
+                        }
+                    ]
+                }
+            },
+            "resources": [{
+				"apiVersion": "2019-03-01",
+				"type": "extensions",
+				"name": "config-app",
+				"location": "[resourceGroup().location]",
+				"dependsOn": [
+				],
+				"properties": {
+					"publisher": "Microsoft.Azure.Extensions",
+					"type": "CustomScript",
+					"typeHandlerVersion": "2.0",
+					"autoUpgradeMinorVersion": true,
+					"settings": {
+						"fileUris": [
+							"https://raw.githubusercontent.com/neilpeterson/tailwind-reference-deployment/master/deployment-artifacts-standalone-vm/config-linux.sh"
+						]
+					},
+					"protectedSettings": {
+						"commandToExecute": "[concat('sudo sh config-linux.sh ',variables('sqlServerName'), ' ', parameters('adminUsername'), ' ', parameters('adminPassword'), ' ', variables('cosmosAccountNameUnique'), ' ' , listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', variables('cosmosAccountNameUnique')), '2015-04-08').primaryMasterKey)]"
+					}
+				}
+			}]
+        },
+        {
+            "name": "[variables('networkInterfaceNameInventory')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-04-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressNameInventory'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId(resourceGroup().name,'Microsoft.Network/publicIpAddresses', variables('publicIpAddressNameInventory'))]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('publicIpAddressNameInventory')]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2018-08-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
+            },
+            "sku": {
+                "name": "[variables('publicIpAddressSku')]"
+            }
+        }
+	]
+}
