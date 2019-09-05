@@ -606,6 +606,7 @@
 				"name": "config-app",
 				"location": "[resourceGroup().location]",
 				"dependsOn": [
+                    "[concat('Microsoft.Compute/virtualMachines/', variables('virtualMachineNameInventory'))]"
 				],
 				"properties": {
 					"publisher": "Microsoft.Azure.Extensions",
@@ -614,11 +615,11 @@
 					"autoUpgradeMinorVersion": true,
 					"settings": {
 						"fileUris": [
-							"https://raw.githubusercontent.com/neilpeterson/tailwind-reference-deployment/master/deployment-artifacts-standalone-vm/config-linux.sh"
+							"https://raw.githubusercontent.com/neilpeterson/brian-templates/master/data-migration-template/configure-mongo.sh"
 						]
 					},
 					"protectedSettings": {
-						"commandToExecute": "[concat('sudo sh config-linux.sh ',variables('sqlServerName'), ' ', parameters('adminUsername'), ' ', parameters('adminPassword'), ' ', variables('cosmosAccountNameUnique'), ' ' , listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', variables('cosmosAccountNameUnique')), '2015-04-08').primaryMasterKey)]"
+						"commandToExecute": "[concat('sudo sh configure-mongo.sh ')]"
 					}
 				}
 			}]

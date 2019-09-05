@@ -17,5 +17,3 @@ echo "mongodb-org-tools hold" | sudo dpkg --set-selections
 sudo sed -i -e "s/127.0.0.1/0.0.0.0/g" /etc/mongod.conf
 
 sudo service mongod start
-
-echo 'cloud-init complete!' > /home/azureuser/cloud-init-complete.txt
